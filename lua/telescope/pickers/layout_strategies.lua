@@ -877,58 +877,28 @@ layout_strategies.bottom_pane = make_documented_layout(
     -- Height
     prompt.height = 1
     results.height = height - prompt.height - (2 * bs)
-    preview.height = results.height - bs
+    preview.height = height - results.height - (3 * bs)
 
     -- Width
     prompt.width = max_columns - 2 * bs
-    if self.previewer and max_columns >= layout_config.preview_cutoff then
-      -- Cap over/undersized width (with preview)
-      local width, w_space = calc_size_and_spacing(max_columns, max_columns, bs, 2, 4, 0)
-
-      preview.width = resolve.resolve_width(vim.F.if_nil(layout_config.preview_width, 0.5))(self, width, max_lines)
-      results.width = width - preview.width - w_space
-    else
-      results.width = prompt.width
-      preview.width = 0
-    end
+    results.width = prompt.width
+    preview.width = prompt.width
 
     -- Line
-    if layout_config.prompt_position == "top" then
-      prompt.line = max_lines - results.height - (1 + bs) + 1
-      results.line = prompt.line + 1
-      preview.line = results.line + bs
-      if results.border == true then
-        results.border = { 0, 1, 1, 1 }
-      end
-      if type(results.title) == "string" then
-        results.title = { { pos = "S", text = results.title } }
-      end
-      if type(preview.title) == "string" then
-        preview.title = { { pos = "S", text = preview.title } }
-      end
-    elseif layout_config.prompt_position == "bottom" then
-      results.line = max_lines - results.height - (1 + bs) + 1
-      preview.line = results.line
-      prompt.line = max_lines - bs
-      if type(prompt.title) == "string" then
-        prompt.title = { { pos = "S", text = prompt.title } }
-      end
-      if results.border == true then
-        results.border = { 1, 1, 0, 1 }
-      end
-    else
-      error(string.format("Unknown prompt_position: %s\n%s", self.window.prompt_position, vim.inspect(layout_config)))
+    results.line = max_lines - results.height - (1 + bs) + 1
+    preview.line = results.line + results.height + bs
+    prompt.line = max_lines - bs
+    if type(prompt.title) == "string" then
+      prompt.title = { { pos = "S", text = prompt.title } }
+    end
+    if results.border == true then
+      results.border = { 1, 1, 0, 1 }
     end
 
     -- Col
     prompt.col = 0 -- centered
-    if layout_config.mirror and preview.width > 0 then
-      results.col = preview.width + (3 * bs) + 1
-      preview.col = bs + 1
-    else
-      results.col = bs + 1
-      preview.col = results.width + (3 * bs) + 1
-    end
+    results.col = bs + 1
+    preview.col = bs + 1
 
     if tbln then
       prompt.line = prompt.line + 1
