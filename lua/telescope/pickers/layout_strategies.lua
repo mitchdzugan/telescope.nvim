@@ -862,14 +862,14 @@ layout_strategies.bottom_pane = make_documented_layout(
     local tbln
     max_lines, tbln = calc_tabline(max_lines)
 
-    local height = vim.F.if_nil(resolve.resolve_height(layout_config.height)(self, max_columns, max_lines), 40)
+    local height = vim.F.if_nil(resolve.resolve_height(layout_config.height)(self, max_columns, max_lines), 25)
     if type(layout_config.height) == "table" and type(layout_config.height.padding) == "number" then
       -- Since bottom_pane only has padding at the top, we only need half as much padding in total
       -- This doesn't match the vim help for `resolve.resolve_height`, but it matches expectations
       height = math.floor((max_lines + height) / 2)
     end
 
-    local bs = get_border_size(self)
+    local bs = 0 -- get_border_size(self)
 
     -- Cap over/undersized height
     height, _ = calc_size_and_spacing(height, max_lines, bs, 2, 3, 0)
@@ -880,7 +880,7 @@ layout_strategies.bottom_pane = make_documented_layout(
     preview.height = (height - prompt.height - (2 * bs)) / 2
 
     -- Width
-    prompt.width = max_columns - 2 * bs
+    prompt.width = max_columns - (2 * bs)
     results.width = prompt.width
     preview.width = prompt.width
 
@@ -892,7 +892,7 @@ layout_strategies.bottom_pane = make_documented_layout(
       prompt.title = { { pos = "S", text = prompt.title } }
     end
     if results.border == true then
-      results.border = { 1, 1, 0, 1 }
+      results.border = { 0, 0, 0, 0 }
     end
 
     -- Col
