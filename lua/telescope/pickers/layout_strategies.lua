@@ -877,7 +877,7 @@ layout_strategies.bottom_pane = make_documented_layout(
     -- Height
     prompt.height = 1
     results.height = (height - prompt.height - (2 * bs)) / 2
-    preview.height = height - results.height - (3 * bs)
+    preview.height = (height - prompt.height - (2 * bs)) / 2
 
     -- Width
     prompt.width = max_columns - 2 * bs
@@ -885,8 +885,8 @@ layout_strategies.bottom_pane = make_documented_layout(
     preview.width = prompt.width
 
     -- Line
-    results.line = max_lines - results.height - (1 + bs) + 1
-    preview.line = results.line + results.height + bs
+    results.line = bs
+    preview.line = 2*bs + results.height
     prompt.line = max_lines - bs
     if type(prompt.title) == "string" then
       prompt.title = { { pos = "S", text = prompt.title } }
@@ -907,7 +907,7 @@ layout_strategies.bottom_pane = make_documented_layout(
     end
 
     return {
-      preview = self.previewer and preview.width > 0 and preview,
+      preview = preview,
       prompt = prompt,
       results = results,
     }
