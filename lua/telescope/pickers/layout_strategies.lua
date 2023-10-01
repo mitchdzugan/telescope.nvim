@@ -885,9 +885,9 @@ layout_strategies.bottom_pane = make_documented_layout(
     preview.width = prompt.width
 
     -- Line
-    prompt.line  = max_lines - bs
-    results.line = max_lines - bs - prompt.height - bs - results.height
-    preview.line = max_lines - bs - prompt.height - bs - results.height - bs - preview.height - bs
+    prompt.line  = max_lines - prompt.height
+    results.line = max_lines - prompt.height - bs - results.height
+    preview.line = max_lines - prompt.height - bs - results.height - bs - preview.height - bs
     if type(prompt.title) == "string" then
       prompt.title = { { pos = "S", text = prompt.title } }
     end
