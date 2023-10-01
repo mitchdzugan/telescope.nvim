@@ -860,7 +860,7 @@ layout_strategies.bottom_pane = make_documented_layout(
     local preview = initial_options.preview
     local tbln
     max_lines, tbln = calc_tabline(max_lines)
-    local bs = 0 -- get_border_size(self)
+    local bs = 1 -- get_border_size(self)
 
     -- Cap over/undersized height
     height = math.floor(max_lines * 0.875)
@@ -874,7 +874,7 @@ layout_strategies.bottom_pane = make_documented_layout(
     -- Width
     prompt.width = max_columns - (2 * bs)
     results.width = prompt.width
-    preview.width = prompt.width
+    preview.width = prompt.width - 4
 
     -- Line
     prompt.line  = max_lines - prompt.height
@@ -883,12 +883,12 @@ layout_strategies.bottom_pane = make_documented_layout(
     if type(prompt.title) == "string" then
       prompt.title = { { pos = "S", text = prompt.title } }
     end
-    results.border = { 1, 1, 1, 1 }
+    preview.border = { 2, 2, 2, 2 }
 
     -- Col
     prompt.col = 0 -- centered
-    results.col = bs + 2
-    preview.col = bs + 1
+    results.col = bs + 1
+    preview.col = bs + 4
 
     if tbln then
       prompt.line = prompt.line + 1
