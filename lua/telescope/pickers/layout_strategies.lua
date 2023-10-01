@@ -876,7 +876,7 @@ layout_strategies.bottom_pane = make_documented_layout(
 
     -- Height
     prompt.height = 1
-    results.height = height - prompt.height - (2 * bs)
+    results.height = (height - prompt.height - (2 * bs)) // 2
     preview.height = height - results.height - (3 * bs)
 
     -- Width
