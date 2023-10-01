@@ -883,9 +883,7 @@ layout_strategies.bottom_pane = make_documented_layout(
     if type(prompt.title) == "string" then
       prompt.title = { { pos = "S", text = prompt.title } }
     end
-    if results.border == true then
-      results.border = { 1, 0, 1, 0 }
-    end
+    results.border = { 1, 0, 1, 0 }
 
     -- Col
     prompt.col = 0 -- centered
