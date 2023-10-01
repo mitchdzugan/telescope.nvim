@@ -863,7 +863,7 @@ layout_strategies.bottom_pane = make_documented_layout(
     local bs = 0 -- get_border_size(self)
 
     -- Cap over/undersized height
-    height = math.floor(max_lines * 0.8)
+    height = math.floor(max_lines * 0.875)
     height, _ = calc_size_and_spacing(height, max_lines, bs, 2, 3, 0)
 
     -- Height
@@ -884,7 +884,7 @@ layout_strategies.bottom_pane = make_documented_layout(
       prompt.title = { { pos = "S", text = prompt.title } }
     end
     if results.border == true then
-      results.border = { 0, 0, 0, 0 }
+      results.border = { 1, 0, 1, 0 }
     end
 
     -- Col
