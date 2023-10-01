@@ -883,11 +883,11 @@ layout_strategies.bottom_pane = make_documented_layout(
     if type(prompt.title) == "string" then
       prompt.title = { { pos = "S", text = prompt.title } }
     end
-    results.border = { 1, 0, 1, 0 }
+    results.border = { 1, 1, 1, 1 }
 
     -- Col
     prompt.col = 0 -- centered
-    results.col = bs + 1
+    results.col = bs + 2
     preview.col = bs + 1
 
     if tbln then
