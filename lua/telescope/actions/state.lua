@@ -33,6 +33,7 @@ local select_to_edit_map = {
   horizontal = "new",
   vertical = "vnew",
   tab = "tabedit",
+  bg_tab = "BGtabedit",
   drop = "drop",
   ["tab drop"] = "tab drop",
 }

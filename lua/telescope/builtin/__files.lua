@@ -115,6 +115,7 @@ files.live_grep = function(opts)
   end
   local search_dirs = opts.search_dirs
   local grep_open_files = opts.grep_open_files
+  local grep_current_only = opts.grep_current_only
   opts.cwd = opts.cwd and vim.fn.expand(opts.cwd) or vim.loop.cwd()
 
   local filelist = get_open_filelist(grep_open_files, opts.cwd)
@@ -152,20 +153,23 @@ files.live_grep = function(opts)
   local args = flatten { vimgrep_arguments, additional_args }
   opts.__inverted, opts.__matches = opts_contain_invert(args)
 
+  local current_only = { vim.fn.expand('%') }
   local live_grepper = finders.new_job(function(prompt)
-    if not prompt or prompt == "" then
-      return nil
-    end
+      if not prompt or prompt == "" then
+        return nil
+      end
 
-    local search_list = {}
+      local search_list = {}
 
-    if grep_open_files then
-      search_list = filelist
-    elseif search_dirs then
-      search_list = search_dirs
-    end
+      if grep_current_only then
+        search_list = current_only
+      elseif grep_open_files then
+        search_list = filelist
+      elseif search_dirs then
+        search_list = search_dirs
+      end
 
-    return flatten { args, "--", prompt, search_list }
+      return flatten { args, "--", prompt, search_list }
   end, opts.entry_maker or make_entry.gen_from_vimgrep(opts), opts.max_results, opts.cwd)
 
   pickers

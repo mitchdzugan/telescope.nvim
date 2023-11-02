@@ -32,9 +32,18 @@ local detect_from_modeline = function(p)
   end
 end
 
+local function ends_with(str, ending)
+  return ending == "" or str:sub(-#ending) == ending
+end
+
+
 utils.filetype_detect = function(filepath)
   if type(filepath) ~= string then
     filepath = tostring(filepath)
+  end
+
+  if ends_with(filepath, ".zn") then
+    return "clojure"
   end
 
   local match = vim.filetype.match { filename = filepath }

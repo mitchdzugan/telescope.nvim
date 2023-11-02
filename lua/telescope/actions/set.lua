@@ -47,7 +47,11 @@ end
 ---@param type string: The type of selection to make
 --          Valid types include: "default", "horizontal", "vertical", "tabedit"
 action_set.select = function(prompt_bufnr, type)
-  return action_set.edit(prompt_bufnr, action_state.select_key_to_edit_key(type))
+  if (type == "bg_tab") then
+    return action_set.bg_edit(prompt_bufnr, action_state.select_key_to_edit_key(type))
+  else
+    return    action_set.edit(prompt_bufnr, action_state.select_key_to_edit_key(type))
+  end
 end
 
 -- goal: currently we have a workaround in actions/init.lua where we do this for all files
@@ -81,6 +85,7 @@ do
     ["botright new"] = "botright sbuffer",
     ["botright vnew"] = "botright vert sbuffer",
     tabedit = "tab sb",
+    BGtabedit = "BGtab sb",
   }
 
   edit_buffer = function(command, bufnr)
@@ -124,7 +129,8 @@ end
 --      - "topleft vnew"
 --      - "botright new"
 --      - "botright vnew"
-action_set.edit = function(prompt_bufnr, command)
+action_set.edit = function(prompt_bufnr, command, do_close_)
+  local do_close = do_close_ == nil and true or do_close_
   local entry = action_state.get_selected_entry()
 
   if not entry then
@@ -167,7 +173,6 @@ action_set.edit = function(prompt_bufnr, command)
   end
 
   local entry_bufnr = entry.bufnr
-
   local picker = action_state.get_current_picker(prompt_bufnr)
   require("telescope.pickers").on_close_prompt(prompt_bufnr)
   pcall(vim.api.nvim_set_current_win, picker.original_win_id)
@@ -185,6 +190,19 @@ action_set.edit = function(prompt_bufnr, command)
 
   if win_id ~= 0 and a.nvim_get_current_win() ~= win_id then
     vim.api.nvim_set_current_win(win_id)
+  end
+
+  local ignore_prenav = {
+    drop = true,
+    ["tab drop"] = true,
+  }
+  local newtab_prenav = {
+    tabedit = true,
+    BGtabedit = true,
+  }
+  if not (ignore_prenav[command]) then
+    local currfile = vim.api.nvim_buf_get_name(0)
+    vim.g.dz_dev.prenav(filename, newtab_prenav[command] or false, row, col)
   end
 
   if entry_bufnr then
@@ -218,6 +236,115 @@ action_set.edit = function(prompt_bufnr, command)
       log.debug("Failed to move to cursor:", err_msg, row, col)
     end
   end
+end
+
+action_set.bg_edit = function(prompt_bufnr, command)
+  local entry = action_state.get_selected_entry()
+
+  if not entry then
+    utils.notify("actions.set.edit", {
+      msg = "Nothing currently selected",
+      level = "WARN",
+    })
+    return
+  end
+
+  local filename, row, col
+
+  if entry.path or entry.filename then
+    filename = entry.path or entry.filename
+
+    -- TODO: Check for off-by-one
+    row = entry.row or entry.lnum
+    col = entry.col
+  elseif not entry.bufnr then
+    -- TODO: Might want to remove this and force people
+    -- to put stuff into `filename`
+    local value = entry.value
+    if not value then
+      utils.notify("actions.set.edit", {
+        msg = "Could not do anything with blank line...",
+        level = "WARN",
+      })
+      return
+    end
+
+    if type(value) == "table" then
+      value = entry.display
+    end
+
+    local sections = vim.split(value, ":")
+
+    filename = sections[1]
+    row = tonumber(sections[2])
+    col = tonumber(sections[3])
+  end
+
+  local entry_bufnr = entry.bufnr
+  local picker = action_state.get_current_picker(prompt_bufnr)
+  picker.is_backgrounding = true
+  -- require("telescope.pickers").on_close_prompt(prompt_bufnr)
+  -- pcall(vim.api.nvim_set_current_win, picker.original_win_id)
+  local win_id = picker.get_selection_window(picker, entry)
+
+  -- if picker.push_cursor_on_edit then
+    -- vim.cmd "normal! m'"
+  -- end
+
+  local ignore_prenav = {
+    drop = true,
+    ["tab drop"] = true,
+  }
+  if not (ignore_prenav[command]) then
+    local currfile = vim.api.nvim_buf_get_name(0)
+    vim.g.dz_dev.prenav(filename, true, row, col)
+  end
+
+  if picker.push_tagstack_on_edit then
+    local from = { vim.fn.bufnr "%", vim.fn.line ".", vim.fn.col ".", 0 }
+    local items = { { tagname = vim.fn.expand "<cword>", from = from } }
+    vim.fn.settagstack(vim.fn.win_getid(), { items = items }, "t")
+  end
+
+  -- if win_id ~= 0 and a.nvim_get_current_win() ~= win_id then
+    -- vim.api.nvim_set_current_win(win_id)
+  -- end
+
+  if entry_bufnr then
+    if not vim.api.nvim_buf_get_option(entry_bufnr, "buflisted") then
+      vim.api.nvim_buf_set_option(entry_bufnr, "buflisted", true)
+    end
+    edit_buffer(command, entry_bufnr)
+  else
+    -- check if we didn't pick a different buffer
+    -- prevents restarting lsp server
+    if vim.api.nvim_buf_get_name(0) ~= filename or command ~= "edit" then
+      filename = Path:new(filename):normalize(vim.loop.cwd())
+      pcall(vim.cmd, string.format("%s %s", command, vim.fn.fnameescape(filename)))
+    end
+  end
+  picker.is_backgrounding = false
+  local dz_dev = vim.g.dz_dev
+  dz_dev.backgrounded = dz_dev.backgrounded + 1
+  vim.g.dz_dev = dz_dev
+
+  -- local pos = vim.api.nvim_win_get_cursor(0)
+  -- if col == nil then
+    -- if row == pos[1] then
+      -- col = pos[2] + 1
+    -- elseif row == nil then
+      -- row, col = pos[1], pos[2] + 1
+    -- else
+      -- col = 1
+    -- end
+  -- end
+
+  -- if row and col then
+    -- local ok, err_msg = pcall(a.nvim_win_set_cursor, 0, { row, col })
+    -- if not ok then
+      -- log.debug("Failed to move to cursor:", err_msg, row, col)
+    -- end
+  -- end
 end
 
 --- Scrolls the previewer up or down.

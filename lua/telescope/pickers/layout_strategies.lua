@@ -852,6 +852,7 @@ layout_strategies.bottom_pane = make_documented_layout(
   vim.tbl_extend("error", shared_options, {
     preview_width = { "Change the width of Telescope's preview window", "See |resolver.resolve_width()|" },
     preview_cutoff = "When columns are less than this value, the preview will be disabled",
+    height_ratio = "set the ratio for the height of the top window vs bottom",
   }),
   function(self, max_columns, max_lines, layout_config)
     local initial_options = p_window.get_initial_window_options(self)
@@ -860,35 +861,38 @@ layout_strategies.bottom_pane = make_documented_layout(
     local preview = initial_options.preview
     local tbln
     max_lines, tbln = calc_tabline(max_lines)
-    local bs = 0 -- get_border_size(self)
+    local bs = 1 -- get_border_size(self)
 
     -- Cap over/undersized height
-    height = math.floor(max_lines * 0.875)
+    height = math.floor(max_lines * (layout_config.height_ratio or 1.0))
     height, _ = calc_size_and_spacing(height, max_lines, bs, 2, 3, 0)
 
     -- Height
-    prompt.height = 1
-    results.height = math.floor((height - prompt.height - (2 * bs)) / 2)
-    preview.height = math.floor((height - prompt.height - (2 * bs)) / 2)
+    prompt.height = 0
+    results.height = math.floor((height - prompt.height - (4 * bs)) / 3)
+    preview.height = height - prompt.height - results.height - (2 * bs) - 1
 
     -- Width
-    prompt.width = max_columns - (2 * bs)
-    results.width = prompt.width
-    preview.width = prompt.width
+    prompt.width = max_columns - 0
+    results.width = prompt.width - (2 * bs)
+    preview.width = prompt.width - (2 * bs)
 
     -- Line
     prompt.line  = max_lines - prompt.height
-    results.line = max_lines - prompt.height - bs - results.height
-    preview.line = max_lines - prompt.height - bs - results.height - bs - preview.height - bs
-    if type(prompt.title) == "string" then
-      prompt.title = { { pos = "S", text = prompt.title } }
-    end
-    preview.border = { 0, 0, 0, 0 }
+    results.line = max_lines - 1 - prompt.height - results.height
+    preview.line = max_lines - 1 - prompt.height - results.height - preview.height
+    -- if type(prompt.title) == "string" then
+      -- prompt.title = { { pos = "S", text = prompt.title } }
+    -- end
+    preview.border = true
+    preview.borderchars = {"─", " ", "─", " ", "─", "─", "─", "─"}
+    results.border = true
+    results.borderchars = {"─", "│", "─", "│", "┌", "┐", "┘", "└"}
 
     -- Col
-    prompt.col = 0 -- centered
-    results.col = bs + 1
-    preview.col = bs + 4
+    prompt.col = 0
+    results.col = 2
+    preview.col = 2
 
     if tbln then
       prompt.line = prompt.line + 1

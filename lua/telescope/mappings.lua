@@ -144,7 +144,8 @@ mappings.default_mappings = config.values.default_mappings
       ["<CR>"] = actions.select_default,
       ["<C-x>"] = actions.select_horizontal,
       ["<C-v>"] = actions.select_vertical,
-      ["<C-t>"] = actions.select_tab,
+      ["<Tab>"] = actions.select_tab,
+      ["<S-Tab>"] = actions.select_bg_tab,
 
       ["<C-u>"] = actions.preview_scrolling_up,
       ["<C-d>"] = actions.preview_scrolling_down,
@@ -156,8 +157,8 @@ mappings.default_mappings = config.values.default_mappings
       ["<M-f>"] = actions.results_scrolling_left,
       ["<M-k>"] = actions.results_scrolling_right,
 
-      ["<Tab>"] = actions.toggle_selection + actions.move_selection_worse,
-      ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
+      ["<C-,>"] = actions.toggle_selection + actions.move_selection_worse,
+      ["<C-->"] = actions.toggle_selection + actions.move_selection_better,
       ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
       ["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
       ["<C-l>"] = actions.complete_tag,
@@ -174,10 +175,11 @@ mappings.default_mappings = config.values.default_mappings
       ["<CR>"] = actions.select_default,
       ["<C-x>"] = actions.select_horizontal,
       ["<C-v>"] = actions.select_vertical,
-      ["<C-t>"] = actions.select_tab,
+      ["<Tab>"] = actions.select_tab,
+      ["<S-Tab>"] = actions.select_bg_tab,
 
-      ["<Tab>"] = actions.toggle_selection + actions.move_selection_worse,
-      ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
+      ["<C-,>"] = actions.toggle_selection + actions.move_selection_worse,
+      ["<C-->"] = actions.toggle_selection + actions.move_selection_better,
       ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
       ["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 

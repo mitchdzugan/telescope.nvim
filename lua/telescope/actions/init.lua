@@ -313,6 +313,18 @@ actions.select_tab = {
   end,
 }
 
+--- Perform 'bg_tab' action on selection, usually something like<br>
+---`:BGtabedit <selection>`
+---
+--- i.e. open the selection in a new tab
+---@param prompt_bufnr number: The prompt bufnr
+actions.select_bg_tab = {
+  pre = append_to_history,
+  action = function(prompt_bufnr)
+    return action_set.select(prompt_bufnr, "bg_tab")
+  end,
+}
+
 --- Perform 'drop' action on selection, usually something like<br>
 ---`:drop <selection>`
 ---
@@ -366,6 +378,13 @@ end
 ---@param prompt_bufnr number: The prompt bufnr
 actions.file_tab = function(prompt_bufnr)
   return action_set.edit(prompt_bufnr, "tabedit")
+end
+
+--- Perform file background tab on selection, usually something like<br>
+--- `:BGtabedit <selection>`
+---@param prompt_bufnr number: The prompt bufnr
+actions.file_bg_tab = function(prompt_bufnr)
+  return action_set.select(prompt_bufnr, "bg_tab")
 end
 
 actions.close_pum = function(_)
@@ -1368,6 +1387,7 @@ actions.which_key = function(prompt_bufnr, opts)
   a.nvim_win_set_option(km_win_id, "winblend", opts.winblend)
   a.nvim_win_set_option(km_win_id, "foldenable", false)
 
+  utils.notify("autocmd.create", { msg = "attaching bufleave", level = "ERROR" })
   vim.api.nvim_create_autocmd("BufLeave", {
     buffer = km_buf,
     once = true,

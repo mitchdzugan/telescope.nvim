@@ -223,6 +223,8 @@ Picker.__index = Picker
 function Picker:new(opts)
   opts = opts or {}
 
+  vim.g.dz_dev.start_picking()
+
   if opts.layout_strategy and opts.get_window_options then
     error "layout_strategy and get_window_options are not compatible keys"
   end
@@ -677,7 +679,7 @@ function Picker:find()
     nested = true,
     once = true,
     callback = function()
-      require("telescope.pickers").on_close_prompt(self.prompt_bufnr)
+      require("telescope.pickers").on_close_prompt(self.prompt_bufnr, true)
     end,
   })
   vim.api.nvim_create_autocmd("VimResized", {
@@ -1520,9 +1522,13 @@ end
 
 --- Close the picker which has prompt with buffer number `prompt_bufnr`
 ---@param prompt_bufnr number
-function pickers.on_close_prompt(prompt_bufnr)
+function pickers.on_close_prompt(prompt_bufnr, is_from_leave_)
+  local is_from_leave = is_from_leave_ == nil and false or is_from_leave_
   local status = state.get_status(prompt_bufnr)
   local picker = status.picker
+  if (is_from_leave and picker.is_backgrounding) then
+    return
+  end
   require("telescope.actions.state").get_current_history():reset()
 
   if type(picker.cache_picker) == "table" then
@@ -1581,6 +1587,7 @@ function pickers.on_close_prompt(prompt_bufnr)
     buffer = prompt_bufnr,
   }
   picker.close_windows(status)
+  vim.g.dz_dev.stop_picking()
 end
 
 function pickers.on_resize_window(prompt_bufnr)
